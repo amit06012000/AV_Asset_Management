@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AV Asset Manager | Intuit India</title>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'AvenirNext forINTUIT','Avenir Next LT Pro','Avenir Next',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f3f5;min-height:100vh}
+:root{--super-blue:#236cff;--blueberry-110:#1a4fcc;--blueberry-120:#0f3399;--blueberry-20:#d4e2ff;--blueberry-10:#eaf0ff;--midnight:#0c1a4d;--agave:#00c4b4;--agave-110:#009e91;--agave-20:#ccf4f1;--lemon:#f9c41a;--lemon-20:#fef6cc;--persimmon:#e05a2b;--persimmon-20:#fcdfd4;--boysenberry:#7b2d8b;--boysenberry-20:#f0d9f4;--ink:#1d1d1d;--slate:#3d4f5e;--slate-80:#667788;--slate-40:#b3bec9;--slate-20:#dce2e8;--slate-10:#f0f3f5;--sidebar-w:228px}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--midnight);color:#fff;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.main-content{margin-left:var(--sidebar-w);min-height:100vh;background:var(--slate-10)}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);transition:.3s}.sidebar.open{transform:translateX(0)}.main-content{margin-left:0}}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:13.5px;color:#a0aec0;border-left:3px solid transparent;transition:all .15s;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:rgba(35,108,255,.18);color:#fff;border-left-color:var(--super-blue)}
+.header{background:#fff;padding:14px 24px;border-bottom:1px solid var(--slate-20);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:13.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;user-select:none;font-family:inherit}
+.btn-primary{background:var(--super-blue);color:#fff}.btn-primary:hover{background:var(--blueberry-110)}.btn-primary:active{transform:scale(.98)}
+.btn-secondary{background:var(--slate-10);color:var(--slate);border:1px solid var(--slate-20)}.btn-secondary:hover{background:var(--slate-20)}
+.btn-danger{background:var(--persimmon);color:#fff}.btn-danger:hover{background:#c24d22}
+.btn-ghost{background:transparent;color:var(--slate-80);border:1px solid var(--slate-20)}.btn-ghost:hover{background:var(--slate-10)}
+.btn-success{background:var(--agave);color:#fff}.btn-success:hover{background:var(--agave-110)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.card{background:#fff;border-radius:10px;border:1px solid var(--slate-20);overflow:hidden}
+.input-field{width:100%;padding:9px 12px;border:1px solid var(--slate-40);border-radius:7px;font-size:14px;color:var(--ink);background:#fff;transition:.15s;outline:none;font-family:inherit}
+.input-field:focus{border-color:var(--super-blue);box-shadow:0 0 0 3px rgba(35,108,255,.12)}
+.label{display:block;font-size:12.5px;font-weight:500;color:var(--slate);margin-bottom:5px}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600}
+.badge-blue{background:var(--blueberry-10);color:var(--blueberry-110)}
+.badge-gray{background:var(--slate-10);color:var(--slate)}
+.badge-green{background:var(--agave-20);color:var(--agave-110)}
+.badge-teal{background:var(--agave-20);color:var(--agave-110)}
+.badge-purple{background:var(--boysenberry-20);color:var(--boysenberry)}
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:12px 18px;border-radius:8px;font-size:13.5px;font-weight:500;color:#fff;pointer-events:auto;animation:slideIn .25s ease;max-width:340px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.toast-success{background:#16a34a}.toast-error{background:var(--persimmon)}.toast-info{background:var(--super-blue)}
+@keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.modal{background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-lg{max-width:720px}.modal-xl{max-width:940px}
+.device-card{border-radius:12px;padding:22px;color:#fff;margin-bottom:18px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+.device-card-blue{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
+.device-card-gray{background:linear-gradient(135deg,#374151,#1f2937)}
+.device-card-teal{background:linear-gradient(135deg,#0d9488,#0f766e)}
+.device-card-purple{background:linear-gradient(135deg,#7c3aed,#6d28d9)}
+.device-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+@media(max-width:600px){.device-field-grid{grid-template-columns:1fr}}
+.field-item{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.field-label{font-size:10.5px;opacity:.7;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+.field-value{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:7px;word-break:break-all}
+.copy-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 9px;border-radius:5px;font-size:11px;cursor:pointer;transition:.1s;white-space:nowrap;flex-shrink:0}
+.copy-btn:hover{background:rgba(255,255,255,.35)}
+.room-card{background:#fff;border-radius:10px;border:1px solid var(--slate-20);padding:18px;transition:all .18s}
+.room-card:hover{border-color:#93c5fd;box-shadow:0 4px 18px rgba(35,108,255,.1);transform:translateY(-1px)}
+.spinner{width:34px;height:34px;border:3px solid var(--slate-20);border-top-color:var(--super-blue);border-radius:50%;animation:spin .7s linear infinite;margin:50px auto}
+.spinner-sm{width:16px;height:16px;border-width:2px;margin:0;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:var(--slate-10);padding:10px 14px;text-align:left;font-size:11.5px;font-weight:700;color:var(--slate-80);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--slate-20);white-space:nowrap}
+td{padding:11px 14px;font-size:13.5px;color:var(--ink);border-bottom:1px solid var(--slate-10);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--slate-10)}
+.page-content{padding:26px}
+.section-title{font-size:20px;font-weight:700;color:var(--midnight);margin-bottom:3px}
+.section-sub{font-size:13px;color:var(--slate-80);margin-bottom:22px}
+.empty-state{text-align:center;padding:70px 20px;color:var(--slate-40)}
+.empty-icon{font-size:44px;margin-bottom:14px}
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--midnight) 0%,#16213e 55%,#0f3460 100%);padding:20px}
+.login-box{background:#fff;border-radius:18px;padding:42px;width:100%;max-width:420px;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+.form-group{margin-bottom:16px}
+.input-with-icon{position:relative}
+.input-with-icon .input-field{padding-left:40px}
+.input-with-icon .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--slate-40);width:16px;height:16px;pointer-events:none}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.user-info{padding:14px 20px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:#a0aec0}
+.chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(35,108,255,.25);color:#93c5fd;letter-spacing:.3px}
+select.input-field{appearance:auto;cursor:pointer}
+.toggle-switch{position:relative;display:inline-block;width:44px;height:24px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--slate-40);border-radius:24px;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;left:3px;bottom:3px;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input:checked+.toggle-slider{background:var(--super-blue)}
+input:checked+.toggle-slider:before{transform:translateX(20px)}
+.search-bar{position:relative}
+.search-bar .s-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--slate-40);width:16px;height:16px;pointer-events:none}
+.search-bar input{padding-left:38px}
+.breadcrumb{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--slate-80);margin-bottom:18px;flex-wrap:wrap}
+.breadcrumb a{color:var(--super-blue);cursor:pointer;text-decoration:none;font-weight:500}
+.breadcrumb a:hover{text-decoration:underline}
+.stat-card{background:#fff;border-radius:10px;padding:20px;border:1px solid var(--slate-20)}
+.stat-num{font-size:28px;font-weight:700;line-height:1}
+.stat-label{font-size:12px;color:var(--slate-80);margin-top:4px}
+.mobile-menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;align-items:center}
+@media(max-width:768px){.mobile-menu-btn{display:flex}}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.grid-2{grid-template-columns:1fr}}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:700px){.grid-3{grid-template-columns:1fr}}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.grid-4{grid-template-columns:1fr}}
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.alert{padding:12px 16px;border-radius:8px;font-size:13.5px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.6}
+.alert-info{background:var(--blueberry-10);color:var(--blueberry-110);border:1px solid var(--blueberry-20)}
+.alert-warn{background:var(--lemon-20);color:#92400e;border:1px solid var(--lemon)}
+.alert-error{background:var(--persimmon-20);color:#991b1b;border:1px solid #f8bba4}
+.alert-success{background:var(--agave-20);color:var(--agave-110);border:1px solid #9ee9e3}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11.5px;background:var(--slate-10);color:var(--slate);margin-right:4px;margin-bottom:4px}
+.sync-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:500;margin-bottom:16px}
+.sync-live{background:var(--agave-20);color:var(--agave-110);border:1px solid #9ee9e3}
+.sync-local{background:var(--lemon-20);color:#92400e;border:1px solid var(--lemon)}
+.sync-error{background:var(--persimmon-20);color:var(--persimmon);border:1px solid #f8bba4}
+.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--super-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.ci{background:var(--slate-10);color:var(--midnight);padding:2px 7px;border-radius:4px;font-family:monospace;font-size:12px}
+@media print{.sidebar,.header,.no-print{display:none!important}.main-content{margin-left:0!important}.device-card{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page-content{padding:10px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="text/babel">
+const{useState,useEffect,useCallback,useRef,createContext,useContext}=React;
+
+const KEY={users:'av_mgr_users',rooms:'av_mgr_rooms',devices:'av_mgr_devices',deviceTypes:'av_mgr_device_types',session:'av_mgr_session',audit:'av_mgr_audit',qrBaseUrl:'av_mgr_qr_base_url',syncCfg:'av_mgr_sync_cfg'};
+
+async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+function ls(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.error(e);}}
+
+const PRE_DEVICE_TYPES=[
+  {id:'poly_x70',name:'Poly X70',color:'blue',fields:[
+    {id:'device_name',label:'Device Name',type:'text',required:true},
+    {id:'serial_number',label:'Serial Number',type:'text',required:false},
+    {id:'mac_address',label:'MAC Address',type:'text',required:false,copy:true},
+    {id:'ip_address',label:'IP Address',type:'text',required:false,copy:true},
+    {id:'po_number',label:'PO Number',type:'text',required:false},
+    {id:'invoice_number',label:'Invoice Number',type:'text',required:false},
+    {id:'model',label:'Model',type:'text',required:false},
+    {id:'asset_tag',label:'Asset Tag',type:'text',required:false},
+    {id:'firmware_version',label:'Firmware Version',type:'text',required:false},
+    {id:'notes',label:'Notes',type:'text',required:false},
+  ]},
+  {id:'samsung_display',name:'Samsung Display',color:'gray',fields:[
+    {id:'device_name',label:'Device Name',type:'text',required:true},
+    {id:'serial_number',label:'Serial Number',type:'text',required:false},
+    {id:'mac_address',label:'MAC Address',type:'text',required:false,copy:true},
+    {id:'ip_address',label:'IP Address',type:'text',required:false,copy:true},
+    {id:'po_number',label:'PO Number',type:'text',required:false},
+    {id:'invoice_number',label:'Invoice Number',type:'text',required:false},
+    {id:'model',label:'Model',type:'text',required:false},
+    {id:'asset_tag',label:'Asset Tag',type:'text',required:false},
+    {id:'screen_size',label:'Screen Size',type:'text',required:false},
+    {id:'input_type',label:'Input Type',type:'dropdown',options:['HDMI1','HDMI2','DisplayPort'],required:false},
+    {id:'active_input',label:'Active Input',type:'text',required:false},
+    {id:'resolution',label:'Resolution',type:'text',required:false},
+    {id:'notes',label:'Notes',type:'text',required:false},
+  ]},
+  {id:'poly_tc8',name:'Poly TC8',color:'teal',fields:[
+    {id:'device_name',label:'Device Name',type:'text',required:true},
+    {id:'serial_number',label:'Serial Number',type:'text',required:false},
+    {id:'mac_address',label:'MAC Address',type:'text',required:false,copy:true},
+    {id:'ip_address',label:'IP Address',type:'text',required:false,copy:true},
+    {id:'po_number',label:'PO Number',type:'text',required:false},
+    {id:'invoice_number',label:'Invoice Number',type:'text',required:false},
+    {id:'model',label:'Model',type:'text',required:false},
+    {id:'asset_tag',label:'Asset Tag',type:'text',required:false},
+    {id:'firmware_version',label:'Firmware Version',type:'text',required:false},
+    {id:'paired_with',label:'Paired With',type:'text',required:false},
+    {id:'notes',label:'Notes',type:'text',required:false},
+  ]},
+];
+
+async function initStorage(){
+  if(!ls(KEY.deviceTypes,null)) ss(KEY.deviceTypes,PRE_DEVICE_TYPES);
+  if(!ls(KEY.users,null)){
+    const ah=await sha256('Intuit@AV2024'),vh=await sha256('Viewer@2024');
+    ss(KEY.users,{av_admin:{username:'av_admin',passwordHash:ah,role:'admin'},av_viewer:{username:'av_viewer',passwordHash:vh,role:'viewer'}});
+  }
+  if(!ls(KEY.rooms,null)) ss(KEY.rooms,[]);
+  if(!ls(KEY.devices,null)) ss(KEY.devices,[]);
+  if(!ls(KEY.audit,null)) ss(KEY.audit,[]);
+}
+function addAudit(user,role,action,details){const logs=ls(KEY.audit,[]);logs.unshift({ts:new Date().toISOString(),user,role,action,details});ss(KEY.audit,logs.slice(0,50));}
+function getQrBaseUrl(){const s=ls(KEY.qrBaseUrl,null);if(s) return s;const c=window.location.href.split('?')[0];return c.startsWith('file://')?'':c;}
+function buildAppData(){return{rooms:ls(KEY.rooms,[]),devices:ls(KEY.devices,[]),deviceTypes:ls(KEY.deviceTypes,[]),lastUpdated:new Date().toISOString(),version:'3.0'};}
+function applyAppData(d){if(d.rooms) ss(KEY.rooms,d.rooms);if(d.devices) ss(KEY.devices,d.devices);if(d.deviceTypes) ss(KEY.deviceTypes,d.deviceTypes);}
+
+/* ── SYNC ENGINE ── */
+const SyncCtx=createContext(null);
+const ToastCtx=createContext(null);
+const AuthCtx=createContext(null);
+
+async function ghFetch(owner,repo,token,path){
+  const h={'Accept':'application/vnd.github.v3+json'};
+  if(token) h['Authorization']=`token ${token}`;
+  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:h});
+  if(r.status===404) return{data:null,sha:null};
+  if(!r.ok) throw new Error('GitHub '+r.status);
+  const j=await r.json();
+  return{data:JSON.parse(atob(j.content.replace(/\n/g,''))),sha:j.sha};
+}
+async function ghPush(owner,repo,token,data,sha,path){
+  const h={'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
+  if(token) h['Authorization']=`token ${token}`;
+  const body={message:`AV sync ${new Date().toISOString()}`,content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))))};
+  if(sha) body.sha=sha;
+  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{method:'PUT',headers:h,body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json();throw new Error(e.message);}
+  return(await r.json()).content.sha;
+}
+async function sheetsFetch(sheetId){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=av_data`;
+  const r=await fetch(url);const t=await r.text();
+  const j=JSON.parse(t.replace(/^[^(]+\(/,'').replace(/\);?$/,''));
+  const rows=j.table?.rows;
+  if(!rows||rows.length===0) return null;
+  const raw=rows[0].c[0]?.v;
+  return raw?JSON.parse(raw):null;
+}
+async function sheetsPush(scriptUrl,sheetId,data){
+  const r=await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheetId,data:JSON.stringify(data)})});
+  if(!r.ok) throw new Error('Script error '+r.status);
+}
+
+function SyncProvider({children}){
+  const defCfg={mode:'local',sheetsId:'',sheetsScriptUrl:'',githubOwner:'',githubRepo:'',githubToken:'',githubPath:'av_data.json',autoSync:true,syncInterval:30};
+  const [cfg,setCfg]=useState(()=>({...defCfg,...(ls(KEY.syncCfg,{}))}));
+  const [status,setStatus]=useState('local');
+  const [lastSync,setLastSync]=useState(null);
+  const [ghSha,setGhSha]=useState(null);
+  const timer=useRef(null);
+
+  const saveCfg=useCallback((u)=>{const n={...cfg,...u};setCfg(n);ss(KEY.syncCfg,n);},[cfg]);
+
+  const pull=useCallback(async(silent=false)=>{
+    if(cfg.mode==='local'){setStatus('local');return;}
+    setStatus('syncing');
+    try{
+      let data=null;
+      if((cfg.mode==='sheets'||cfg.mode==='both')&&cfg.sheetsId){
+        try{data=await sheetsFetch(cfg.sheetsId);}catch(e){if(!silent)console.warn('Sheets pull:',e);}
+      }
+      if(!data&&(cfg.mode==='github'||cfg.mode==='both')&&cfg.githubOwner&&cfg.githubRepo&&cfg.githubToken){
+        const{data:d,sha}=await ghFetch(cfg.githubOwner,cfg.githubRepo,cfg.githubToken,cfg.githubPath||'av_data.json');
+        if(d){data=d;setGhSha(sha);}
+      }
+      if(data) applyAppData(data);
+      setStatus('live');setLastSync(new Date());
+    }catch(e){setStatus('error');if(!silent)console.error('Pull:',e);}
+  },[cfg]);
+
+  const push=useCallback(async()=>{
+    if(cfg.mode==='local') return true;
+    setStatus('syncing');
+    const data=buildAppData();
+    try{
+      if((cfg.mode==='sheets'||cfg.mode==='both')&&cfg.sheetsId&&cfg.sheetsScriptUrl)
+        await sheetsPush(cfg.sheetsScriptUrl,cfg.sheetsId,data);
+      if((cfg.mode==='github'||cfg.mode==='both')&&cfg.githubOwner&&cfg.githubRepo&&cfg.githubToken){
+        const newSha=await ghPush(cfg.githubOwner,cfg.githubRepo,cfg.githubToken,data,ghSha,cfg.githubPath||'av_data.json');
+        setGhSha(newSha);
+      }
+      setStatus('live');setLastSync(new Date());return true;
+    }catch(e){setStatus('error');console.error('Push:',e);return false;}
+  },[cfg,ghSha]);
+
+  useEffect(()=>{
+    if(cfg.mode==='local'||!cfg.autoSync){setStatus(cfg.mode==='local'?'local':'live');return;}
+    pull(true);
+    timer.current=setInterval(()=>pull(true),(cfg.syncInterval||30)*1000);
+    return()=>clearInterval(timer.current);
+  },[cfg.mode,cfg.autoSync,cfg.syncInterval]);
+
+  return <SyncCtx.Provider value={{cfg,saveCfg,status,lastSync,pull,push}}>{children}</SyncCtx.Provider>;
+}
+
+/* ── TOAST ── */
+function ToastProvider({children}){
+  const[toasts,setToasts]=useState([]);
+  const show=useCallback((msg,type='success')=>{const id=Date.now()+Math.random();setToasts(p=>[...p,{id,msg,type}]);setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),3800);},[]);
+  return <ToastCtx.Provider value={show}>{children}<div className="toast-container">{toasts.map(t=><div key={t.id} className={`toast toast-${t.type}`}>{t.msg}</div>)}</div></ToastCtx.Provider>;
+}
+
+/* ── SYNC STATUS BAR ── */
+function SyncBar(){
+  const{status,lastSync,pull,cfg}=useContext(SyncCtx);
+  const modeLabel=cfg.mode==='both'?'Sheets + GitHub':cfg.mode==='sheets'?'Google Sheets':cfg.mode==='github'?'GitHub JSON':'';
+  if(cfg.mode==='local') return <div className="sync-bar sync-local"><div className="sync-dot" style={{background:'var(--lemon)'}}/><span>Local mode — data not shared. Go to <strong>Settings → Live sync</strong> to enable real-time sharing.</span></div>;
+  if(status==='syncing') return <div className="sync-bar" style={{background:'#fff8e1',color:'#92400e',border:'1px solid var(--lemon)'}}><div className="spinner spinner-sm"/><span style={{marginLeft:6}}>Syncing…</span></div>;
+  if(status==='error') return <div className="sync-bar sync-error"><div className="sync-dot" style={{background:'var(--persimmon)'}}/><span>Sync error. <button onClick={()=>pull()} style={{background:'none',border:'none',color:'inherit',textDecoration:'underline',cursor:'pointer',fontWeight:600}}>Retry</button></span></div>;
+  return <div className="sync-bar sync-live">
+    <div className="sync-dot" style={{background:'var(--agave)',animation:'pulse 1.5s infinite'}}/>
+    <span>🟢 Live sync active ({modeLabel}) · Last: {lastSync?lastSync.toLocaleTimeString():'—'}</span>
+    <button onClick={()=>pull()} style={{background:'none',border:'none',color:'inherit',cursor:'pointer',marginLeft:'auto',fontSize:'12px',fontWeight:700}}>↻ Refresh</button>
+  </div>;
+}
+
+/* ── ROOT APP ── */
+function App(){
+  const[ready,setReady]=useState(false);
+  const[session,setSession]=useState(null);
+  const[page,setPage]=useState('dashboard');
+  const[params,setParams]=useState({});
+  const[sidebarOpen,setSidebarOpen]=useState(false);
+  const timer=useRef(null);
+  const toast=useContext(ToastCtx);
+
+  useEffect(()=>{
+    initStorage().then(()=>{
+      const s=ls(KEY.session,null);
+      if(s&&s.expires>Date.now()) setSession(s);else ss(KEY.session,null);
+      const p=new URLSearchParams(window.location.search);
+      const rid=p.get('room');if(rid) ss('av_mgr_pending_room',rid);
+      const sb=ls(KEY.qrBaseUrl,null);
+      if(!sb){const a=window.location.href.split('?')[0];if(!a.startsWith('file://')) ss(KEY.qrBaseUrl,a);}
+      setReady(true);
+    });
+  },[]);
+
+  const resetTimer=useCallback(()=>{
+    clearTimeout(timer.current);
+    timer.current=setTimeout(()=>{ss(KEY.session,null);setSession(null);toast&&toast('Session expired','error');},30*60*1000);
+  },[toast]);
+
+  useEffect(()=>{
+    if(!session) return;
+    const pr=ls('av_mgr_pending_room',null);
+    if(pr){ss('av_mgr_pending_room',null);navigate('room',{roomId:pr});}
+    const evs=['mousedown','keydown','touchstart','scroll'];
+    evs.forEach(e=>document.addEventListener(e,resetTimer));resetTimer();
+    return()=>{evs.forEach(e=>document.removeEventListener(e,resetTimer));clearTimeout(timer.current);};
+  },[session,resetTimer]);
+
+  const{pull:syncPull}=useContext(SyncCtx);
+  const navigate=(p,prms={})=>{setPage(p);setParams(prms);setSidebarOpen(false);window.scrollTo(0,0);};
+  const login=async(u,pw)=>{
+    const users=ls(KEY.users,{});const user=users[u];if(!user) return false;
+    const h=await sha256(pw);if(h!==user.passwordHash) return false;
+    const s={username:u,role:user.role,loginTime:Date.now(),expires:Date.now()+30*60*1000};
+    ss(KEY.session,s);setSession(s);addAudit(u,user.role,'LOGIN','Logged in');
+    setTimeout(()=>syncPull(true),400);
+    return true;
+  };
+  const logout=()=>{if(session) addAudit(session.username,session.role,'LOGOUT','Logged out');ss(KEY.session,null);setSession(null);setPage('dashboard');};
+
+  if(!ready) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh'}}><div className="spinner"/></div>;
+  if(!session) return <LoginPage login={login}/>;
+  const isAdmin=session.role==='admin';
+
+  return <AuthCtx.Provider value={{session,isAdmin}}>
+    <div style={{display:'flex'}}>
+      {sidebarOpen&&<div onClick={()=>setSidebarOpen(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:99}}/>}
+      <Sidebar page={page} navigate={navigate} isAdmin={isAdmin} logout={logout} open={sidebarOpen} session={session}/>
+      <div className="main-content" style={{flex:1}}>
+        <TopBar session={session} setSidebarOpen={setSidebarOpen} page={page}/>
+        <PageRouter page={page} navigate={navigate} params={params} isAdmin={isAdmin} session={session}/>
+      </div>
+    </div>
+  </AuthCtx.Provider>;
+}
+
+function Sidebar({page,navigate,isAdmin,logout,open,session}){
+  const{status,cfg}=useContext(SyncCtx);
+  const dotColor=status==='live'?'#4ade80':status==='error'?'#f87171':'#fbbf24';
+  const dotLabel=status==='live'?'Live':status==='error'?'Error':status==='syncing'?'Syncing…':'Local';
+  const navItems=[{id:'dashboard',label:'Dashboard',icon:'🏠'},{id:'rooms',label:'Rooms',icon:'🚪'},...(isAdmin?[{id:'device-types',label:'Device Types',icon:'🖥️'},{id:'bulk-upload',label:'Bulk Upload',icon:'📤'},{id:'audit',label:'Audit Log',icon:'📋'},{id:'settings',label:'Settings',icon:'⚙️'}]:[])];
+  const isA=(id)=>page===id||(id==='rooms'&&page==='room');
+  return <div className={`sidebar ${open?'open':''}`}>
+    <div className="sidebar-logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Intuit-logo.svg/2560px-Intuit-logo.svg.png" alt="Intuit" style={{height:'24px',filter:'brightness(0) invert(1)',display:'block'}}/>
+      <div style={{fontSize:'10.5px',color:'#4a5568',marginTop:6}}>AV Asset Manager</div>
+      <div style={{fontSize:'10px',color:'#374151',marginTop:1}}>Intuit India · Bengaluru</div>
+    </div>
+    <div style={{padding:'8px 0',flex:1}}>{navItems.map(n=><div key={n.id} className={`nav-item ${isA(n.id)?'active':''}`} onClick={()=>navigate(n.id)}><span style={{fontSize:'15px',width:20,textAlign:'center'}}>{n.icon}</span><span>{n.label}</span></div>)}</div>
+    <div style={{padding:'10px 20px',borderBottom:'1px solid rgba(255,255,255,.1)',display:'flex',alignItems:'center',gap:6}}>
+      <div style={{width:7,height:7,borderRadius:'50%',background:dotColor,animation:status==='live'?'pulse 2s infinite':''}}/>
+      <span style={{fontSize:'11px',color:'#94a3b8'}}>{dotLabel} {cfg.mode!=='local'?`(${cfg.mode==='both'?'Sheets+GH':cfg.mode==='sheets'?'Sheets':'GitHub'})`:''}</span>
+    </div>
+    <div className="user-info">
+      <div style={{fontWeight:600,color:'#e2e8f0',fontSize:'13px',marginBottom:4}}>{session.username}</div>
+      <span className="chip">{session.role.toUpperCase()}</span>
+      <button className="btn btn-ghost btn-sm" onClick={logout} style={{marginTop:10,width:'100%',color:'#94a3b8',borderColor:'rgba(255,255,255,.15)',justifyContent:'center'}}>Sign out</button>
+    </div>
+  </div>;
+}
+
+function TopBar({session,setSidebarOpen,page}){
+  const titles={dashboard:'Dashboard',rooms:'Rooms',room:'Room Details','device-types':'Device Types','bulk-upload':'Bulk Upload',audit:'Audit Log',settings:'Settings'};
+  return <div className="header">
+    <div style={{display:'flex',alignItems:'center',gap:14}}>
+      <button className="mobile-menu-btn" onClick={()=>setSidebarOpen(p=>!p)}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Intuit-logo.svg/2560px-Intuit-logo.svg.png" alt="Intuit" style={{height:'20px'}} className="no-print"/>
+      <span style={{fontSize:'13px',color:'#64748b',borderLeft:'1px solid #e2e8f0',paddingLeft:14,fontWeight:500}}>{titles[page]||'AV Asset Manager'}</span>
+    </div>
+    <div style={{display:'flex',alignItems:'center',gap:12,fontSize:'12.5px',color:'#64748b'}}>
+      <span className="no-print">Last login: {new Date(session.loginTime).toLocaleTimeString()}</span>
+      <span className={`badge ${session.role==='admin'?'badge-blue':'badge-gray'}`}>{session.role}</span>
+    </div>
+  </div>;
+}
+
+function PageRouter({page,navigate,params,isAdmin,session}){
+  switch(page){
+    case 'dashboard': return <DashPage navigate={navigate} isAdmin={isAdmin}/>;
+    case 'rooms': return <RoomsPage navigate={navigate} isAdmin={isAdmin} session={session}/>;
+    case 'room': return <RoomDetailPage roomId={params.roomId} navigate={navigate} isAdmin={isAdmin} session={session}/>;
+    case 'device-types': return isAdmin?<DevTypesPage session={session}/>:<Denied/>;
+    case 'bulk-upload': return isAdmin?<BulkPage session={session}/>:<Denied/>;
+    case 'audit': return isAdmin?<AuditPage/>:<Denied/>;
+    case 'settings': return isAdmin?<SettingsPage session={session}/>:<Denied/>;
+    default: return <DashPage navigate={navigate} isAdmin={isAdmin}/>;
+  }
+}
+function Denied(){return <div className="page-content"><div className="alert alert-error">⛔ Access denied.</div></div>;}
+
+/* ── DASHBOARD ── */
+function DashPage({navigate,isAdmin}){
+  const{status}=useContext(SyncCtx);
+  const[rooms,setRooms]=useState(()=>ls(KEY.rooms,[]));
+  const[devices,setDevices]=useState(()=>ls(KEY.devices,[]));
+  const dts=ls(KEY.deviceTypes,[]);
+  const{pull:dPull}=useContext(SyncCtx);
+  useEffect(()=>{dPull(true);},[]);
+  useEffect(()=>{if(status==='live'||status==='local'){setRooms(ls(KEY.rooms,[]));setDevices(ls(KEY.devices,[]));}},[status]);
+  return <div className="page-content">
+    <SyncBar/>
+    <div className="section-title">Welcome to AV Asset Manager</div>
+    <div className="section-sub">Intuit India — Bengaluru Office</div>
+    <div className="grid-4" style={{marginBottom:28}}>
+      <div className="stat-card"><div className="stat-num" style={{color:'var(--super-blue)'}}>{rooms.length}</div><div className="stat-label">Total rooms</div></div>
+      <div className="stat-card"><div className="stat-num" style={{color:'var(--agave)'}}>{devices.length}</div><div className="stat-label">Total devices</div></div>
+      <div className="stat-card"><div className="stat-num" style={{color:'var(--boysenberry)'}}>{dts.length}</div><div className="stat-label">Device types</div></div>
+      <div className="stat-card"><div className="stat-num" style={{color:'#92400e'}}>{rooms.filter(r=>devices.some(d=>d.roomId===r.id)).length}</div><div className="stat-label">Equipped rooms</div></div>
+    </div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+      <h2 style={{fontSize:'16px',fontWeight:700,color:'var(--midnight)'}}>Recent rooms</h2>
+      <button className="btn btn-primary btn-sm" onClick={()=>navigate('rooms')}>View all</button>
+    </div>
+    {rooms.length===0?<div className="empty-state"><div className="empty-icon">🚪</div><p>{isAdmin?'No rooms yet. Go to Rooms → + Add room.':'No rooms yet.'}</p></div>
+    :<div className="rooms-grid">{rooms.slice(0,6).map(r=>{const devs=devices.filter(d=>d.roomId===r.id);return <div key={r.id} className="room-card"><div style={{fontWeight:700,fontSize:'14.5px',color:'var(--midnight)',marginBottom:4}}>{r.name}</div><div style={{fontSize:'12.5px',color:'var(--slate-80)',marginBottom:10}}>{[r.building,r.floor].filter(Boolean).join(' · ')}</div><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><span className="badge badge-blue">{devs.length} devices</span><button className="btn btn-secondary btn-sm" onClick={()=>navigate('room',{roomId:r.id})}>View</button></div></div>;})}
+    </div>}
+  </div>;
+}
+
+/* ── ROOMS ── */
+function RoomsPage({navigate,isAdmin,session}){
+  const toast=useContext(ToastCtx);
+  const{push,status,pull}=useContext(SyncCtx);
+  const[rooms,setRooms]=useState(()=>ls(KEY.rooms,[]));
+  const[search,setSearch]=useState('');
+  const[showAdd,setShowAdd]=useState(false);
+  const[editRoom,setEditRoom]=useState(null);
+  const[deleteId,setDeleteId]=useState(null);
+  const[showQR,setShowQR]=useState(null);
+  const[allQR,setAllQR]=useState(false);
+  useEffect(()=>{pull();},[]);
+  useEffect(()=>{if(status==='live'||status==='local') setRooms(ls(KEY.rooms,[]));},[status]);
+
+  const saveRoom=async(data)=>{
+    let upd;
+    if(editRoom){upd=rooms.map(r=>r.id===editRoom.id?{...r,...data,updatedAt:new Date().toISOString()}:r);addAudit(session.username,session.role,'EDIT_ROOM',`Edited: ${data.name}`);}
+    else{const nr={...data,id:'room_'+Date.now(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};upd=[...rooms,nr];addAudit(session.username,session.role,'ADD_ROOM',`Added: ${data.name}`);}
+    ss(KEY.rooms,upd);setRooms(upd);setShowAdd(false);setEditRoom(null);
+    const ok=await push();toast((editRoom?'Room updated':'Room added')+(ok?' and synced ✓':''));
+  };
+
+  const deleteRoom=async(id)=>{
+    const r=rooms.find(x=>x.id===id);
+    const upd=rooms.filter(x=>x.id!==id);const updd=ls(KEY.devices,[]).filter(d=>d.roomId!==id);
+    ss(KEY.rooms,upd);ss(KEY.devices,updd);setRooms(upd);
+    addAudit(session.username,session.role,'DELETE_ROOM',`Deleted: ${r?.name}`);
+    const ok=await push();toast('Room deleted'+(ok?' and synced ✓':''),'info');setDeleteId(null);
+  };
+
+  const filtered=rooms.filter(r=>r.name.toLowerCase().includes(search.toLowerCase())||(r.floor||'').toLowerCase().includes(search.toLowerCase())||(r.building||'').toLowerCase().includes(search.toLowerCase()));
+
+  return <div className="page-content">
+    <SyncBar/>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20,flexWrap:'wrap',gap:12}}>
+      <div><div className="section-title">Rooms</div><div className="section-sub">All video-conference rooms</div></div>
+      {isAdmin&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        <button className="btn btn-ghost btn-sm" onClick={()=>pull()}>↻ Refresh</button>
+        <button className="btn btn-secondary" onClick={()=>setAllQR(true)}>🔲 All QR codes</button>
+        <button className="btn btn-primary" onClick={()=>{setEditRoom(null);setShowAdd(true)}}>+ Add room</button>
+      </div>}
+    </div>
+    <div className="search-bar" style={{marginBottom:20,maxWidth:380}}>
+      <svg className="s-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input className="input-field" placeholder="Search rooms…" value={search} onChange={e=>setSearch(e.target.value)}/>
+    </div>
+    {filtered.length===0?<div className="empty-state"><div className="empty-icon">🚪</div><p>{search?'No rooms match.':isAdmin?'No rooms yet.':'No rooms available.'}</p></div>
+    :<div className="rooms-grid">{filtered.map(r=>{
+      const devs=ls(KEY.devices,[]).filter(d=>d.roomId===r.id);
+      return <div key={r.id} className="room-card">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+          <div><div style={{fontWeight:700,fontSize:'15px',color:'var(--midnight)'}}>{r.name}</div><div style={{fontSize:'12.5px',color:'var(--slate-80)',marginTop:3}}>{[r.building,r.floor].filter(Boolean).join(' · ')}</div></div>
+          <span className="badge badge-blue">{devs.length} devices</span>
+        </div>
+        {r.capacity&&<div style={{fontSize:'12px',color:'var(--slate-80)',marginBottom:8}}>👥 Capacity: {r.capacity}</div>}
+        <div style={{fontSize:'11.5px',color:'var(--slate-40)',marginBottom:12}}>Updated: {r.updatedAt?new Date(r.updatedAt).toLocaleDateString():'—'}</div>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          <button className="btn btn-secondary btn-sm" onClick={()=>navigate('room',{roomId:r.id})}>👁 View</button>
+          {isAdmin&&<><button className="btn btn-ghost btn-sm" onClick={()=>{setEditRoom(r);setShowAdd(true)}}>✏️ Edit</button><button className="btn btn-ghost btn-sm" onClick={()=>setShowQR(r)}>🔲 QR</button><button className="btn btn-sm" style={{background:'var(--persimmon-20)',color:'var(--persimmon)',border:'1px solid #f8bba4',borderRadius:6,cursor:'pointer',fontSize:'12px',padding:'5px 11px',fontWeight:600}} onClick={()=>setDeleteId(r.id)}>🗑️ Delete</button></>}
+        </div>
+      </div>;
+    })}</div>}
+    {showAdd&&<RoomModal room={editRoom} onClose={()=>{setShowAdd(false);setEditRoom(null)}} onSave={saveRoom}/>}
+    {deleteId&&<Confirm title="Delete room" msg="Delete this room and all its devices?" dangerous onConfirm={()=>deleteRoom(deleteId)} onClose={()=>setDeleteId(null)}/>}
+    {showQR&&<QRModal room={showQR} onClose={()=>setShowQR(null)}/>}
+    {allQR&&<AllQRModal rooms={rooms} onClose={()=>setAllQR(false)}/>}
+  </div>;
+}
+
+function RoomModal({room,onClose,onSave}){
+  const[form,setForm]=useState(room||{name:'',floor:'',building:'',capacity:''});
+  const[err,setErr]=useState({});
+  const set=(k,v)=>setForm(p=>({...p,[k]:v}));
+  const submit=()=>{const e={};if(!form.name.trim()) e.name='Required';if(Object.keys(e).length){setErr(e);return;}onSave(form);};
+  return <div className="modal-overlay"><div className="modal">
+    <h2 style={{fontSize:'17px',fontWeight:700,marginBottom:20,color:'var(--midnight)'}}>{room?'Edit room':'Add room'}</h2>
+    <div className="form-group"><label className="label">Room name *</label><input className="input-field" value={form.name} onChange={e=>set('name',e.target.value)} placeholder="e.g. Himalaya VC Room"/>{err.name&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{err.name}</div>}</div>
+    <div className="grid-2">
+      <div className="form-group"><label className="label">Floor</label><input className="input-field" value={form.floor||''} onChange={e=>set('floor',e.target.value)} placeholder="e.g. Floor 3"/></div>
+      <div className="form-group"><label className="label">Building</label><input className="input-field" value={form.building||''} onChange={e=>set('building',e.target.value)} placeholder="e.g. Tower B"/></div>
+    </div>
+    <div className="form-group"><label className="label">Capacity</label><input className="input-field" type="number" value={form.capacity||''} onChange={e=>set('capacity',e.target.value)}/></div>
+    <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:8}}>
+      <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+      <button className="btn btn-primary" onClick={submit}>{room?'Save changes':'Add room'}</button>
+    </div>
+  </div></div>;
+}
+
+/* ── ROOM DETAIL ── */
+function RoomDetailPage({roomId,navigate,isAdmin,session}){
+  const toast=useContext(ToastCtx);
+  const{push,status,pull}=useContext(SyncCtx);
+  const[allDevices,setAllDevices]=useState(()=>ls(KEY.devices,[]));
+  const[rooms,setRooms]=useState(()=>ls(KEY.rooms,[]));
+  const[showAddDev,setShowAddDev]=useState(false);
+  const[editDev,setEditDev]=useState(null);
+  const[delDev,setDelDev]=useState(null);
+  const[showQR,setShowQR]=useState(false);
+  const[initialLoading,setInitialLoading]=useState(true);
+
+  // On mount: always pull fresh data so QR deep-link shows latest devices
+  useEffect(()=>{
+    pull(true).then(()=>{
+      setRooms(ls(KEY.rooms,[]));
+      setAllDevices(ls(KEY.devices,[]));
+      setInitialLoading(false);
+    });
+  },[]);
+
+  useEffect(()=>{
+    if(status==='live'){
+      setAllDevices(ls(KEY.devices,[]));
+      setRooms(ls(KEY.rooms,[]));
+      setInitialLoading(false);
+    }
+  },[status]);
+
+  const room=rooms.find(r=>r.id===roomId);
+  if(initialLoading) return <div className="page-content"><div style={{display:'flex',alignItems:'center',gap:12,padding:'40px 0'}}><div className="spinner" style={{margin:0}}/><span style={{color:'var(--slate-80)',fontSize:'14px'}}>Loading room data…</span></div></div>;
+  const devices=allDevices.filter(d=>d.roomId===roomId);
+  const dts=ls(KEY.deviceTypes,[]);
+  if(!room) return <div className="page-content"><div className="alert alert-error">Room not found.</div><button className="btn btn-secondary" onClick={()=>navigate('rooms')}>← Back</button></div>;
+
+  const saveDev=async(data)=>{
+    const cur=ls(KEY.devices,[]);let upd;
+    if(editDev){upd=cur.map(d=>d.id===editDev.id?{...d,...data,updatedAt:new Date().toISOString()}:d);addAudit(session.username,session.role,'EDIT_DEVICE',`Edited in ${room.name}`);}
+    else{const nd={...data,id:'dev_'+Date.now(),roomId,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};upd=[...cur,nd];addAudit(session.username,session.role,'ADD_DEVICE',`Added to ${room.name}`);}
+    ss(KEY.devices,upd);setAllDevices(upd);setShowAddDev(false);setEditDev(null);
+    const ok=await push();toast('Device saved'+(ok?' and synced ✓':''));
+  };
+
+  const delDevice=async(id)=>{
+    const upd=ls(KEY.devices,[]).filter(d=>d.id!==id);
+    ss(KEY.devices,upd);setAllDevices(upd);
+    addAudit(session.username,session.role,'DELETE_DEVICE',`Deleted from ${room.name}`);
+    const ok=await push();toast('Device removed'+(ok?' and synced ✓':''),'info');setDelDev(null);
+  };
+
+  const colorFor=(tid)=>({poly_x70:'blue',samsung_display:'gray',poly_tc8:'teal'})[tid]||'purple';
+
+  return <div className="page-content">
+    <div className="breadcrumb no-print"><a onClick={()=>navigate('rooms')}>← Rooms</a><span>/</span><span style={{color:'var(--midnight)',fontWeight:700}}>{room.name}</span></div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:14,marginBottom:20}}>
+      <div>
+        <h1 style={{fontSize:'24px',fontWeight:700,color:'var(--midnight)',marginBottom:6}}>{room.name}</h1>
+        <div style={{fontSize:'13.5px',color:'var(--slate-80)'}}>{[room.building,room.floor,room.capacity?`Capacity: ${room.capacity}`:null].filter(Boolean).join(' · ')}</div>
+        <div style={{fontSize:'12px',color:'var(--slate-40)',marginTop:4}}>Last updated: {room.updatedAt?new Date(room.updatedAt).toLocaleString():'—'}</div>
+      </div>
+      <div className="no-print" style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        <button className="btn btn-secondary" onClick={()=>setShowQR(true)}>🔲 QR</button>
+        <button className="btn btn-secondary" onClick={()=>window.print()}>🖨️ Print</button>
+        {isAdmin&&<button className="btn btn-primary" onClick={()=>{setEditDev(null);setShowAddDev(true)}}>+ Add device</button>}
+      </div>
+    </div>
+    <SyncBar/>
+    {devices.length===0?<div className="empty-state"><div className="empty-icon">🖥️</div><p>{isAdmin?'No devices. Click + Add device.':'No devices configured.'}</p></div>
+    :<div>{devices.map(d=>{
+      const dt=dts.find(t=>t.id===d.deviceTypeId)||{fields:[],name:d.deviceTypeId||'Unknown',color:'purple'};
+      const colorMap={blue:'device-card-blue',gray:'device-card-gray',teal:'device-card-teal',purple:'device-card-purple'};
+      const toast2=useContext(ToastCtx);
+      return <div key={d.id} className={`device-card ${colorMap[colorFor(d.deviceTypeId)]||'device-card-purple'}`}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
+          <div><div style={{fontSize:'17px',fontWeight:700}}>{d.fields?.device_name||dt.name}</div><div style={{fontSize:'12px',opacity:.75,marginTop:3}}>{dt.name}</div></div>
+          {isAdmin&&<div className="no-print" style={{display:'flex',gap:6}}>
+            <button className="copy-btn" onClick={()=>{setEditDev(d);setShowAddDev(true);}}>✏️ Edit</button>
+            <button className="copy-btn" style={{background:'rgba(239,68,68,.35)'}} onClick={()=>setDelDev(d.id)}>🗑️</button>
+          </div>}
+        </div>
+        <div className="device-field-grid">{dt.fields.map(f=>{
+          const val=d.fields?.[f.id];const hv=val!==undefined&&val!==null&&val!=='';
+          const dv=hv?(typeof val==='boolean'?(val?'Yes':'No'):String(val)):'—';
+          const sc=hv&&(f.copy||f.id==='ip_address'||f.id==='mac_address');
+          return <div key={f.id} className="field-item"><div className="field-label">{f.label}</div><div className="field-value"><span style={{opacity:hv?1:.5}}>{dv}</span>{sc&&<button className="copy-btn no-print" onClick={()=>navigator.clipboard.writeText(String(val)).then(()=>toast2&&toast2(`${f.label} copied`))}>Copy</button>}</div></div>;
+        })}</div>
+      </div>;
+    })}</div>}
+    {showAddDev&&<DevFormModal room={room} device={editDev} dts={dts} onClose={()=>{setShowAddDev(false);setEditDev(null);}} onSave={saveDev}/>}
+    {delDev&&<Confirm title="Remove device" msg="Remove this device?" dangerous onConfirm={()=>delDevice(delDev)} onClose={()=>setDelDev(null)}/>}
+    {showQR&&<QRModal room={room} onClose={()=>setShowQR(false)}/>}
+  </div>;
+}
+
+function DevFormModal({room,device,dts,onClose,onSave}){
+  const[typeId,setTypeId]=useState(device?.deviceTypeId||dts[0]?.id||'');
+  const[fields,setFields]=useState(device?.fields||{});
+  const[err,setErr]=useState({});
+  const dt=dts.find(t=>t.id===typeId);
+  const setF=(k,v)=>setFields(p=>({...p,[k]:v}));
+  const submit=()=>{
+    const e={};if(!typeId) e._type='Select a type';
+    if(dt) dt.fields.filter(f=>f.required).forEach(f=>{if(!fields[f.id]) e[f.id]=`${f.label} required`;});
+    if(Object.keys(e).length){setErr(e);return;}onSave({deviceTypeId:typeId,fields});
+  };
+  const rf=(f)=>{
+    const val=fields[f.id]!==undefined?fields[f.id]:'';const e=err[f.id];
+    if(f.type==='toggle') return <div key={f.id} className="form-group"><label className="label">{f.label}</label><label className="toggle-switch"><input type="checkbox" checked={!!fields[f.id]} onChange={ev=>setF(f.id,ev.target.checked)}/><span className="toggle-slider"/></label></div>;
+    if(f.type==='dropdown') return <div key={f.id} className="form-group"><label className="label">{f.label}{f.required&&' *'}</label><select className="input-field" value={val} onChange={ev=>setF(f.id,ev.target.value)}><option value="">Select…</option>{(f.options||[]).map(o=><option key={o} value={o}>{o}</option>)}</select>{e&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{e}</div>}</div>;
+    return <div key={f.id} className="form-group"><label className="label">{f.label}{f.required&&' *'}</label><input className="input-field" type={f.type==='number'?'number':'text'} value={val} onChange={ev=>setF(f.id,ev.target.value)}/>{e&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{e}</div>}</div>;
+  };
+  return <div className="modal-overlay"><div className="modal modal-lg" style={{maxHeight:'88vh',overflowY:'auto'}}>
+    <h2 style={{fontSize:'17px',fontWeight:700,marginBottom:18,color:'var(--midnight)'}}>{device?'Edit device':'Add device'} — {room.name}</h2>
+    <div className="form-group"><label className="label">Device type *</label><select className="input-field" value={typeId} onChange={e=>{setTypeId(e.target.value);setFields({});}}><option value="">Select…</option>{dts.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select>{err._type&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{err._type}</div>}</div>
+    {dt&&<div className="grid-2">{dt.fields.map(rf)}</div>}
+    <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:18}}><button className="btn btn-secondary" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={submit}>{device?'Save changes':'Add device'}</button></div>
+  </div></div>;
+}
+
+/* ── DEVICE TYPES ── */
+function DevTypesPage({session}){
+  const toast=useContext(ToastCtx);
+  const[types,setTypes]=useState(()=>ls(KEY.deviceTypes,[]));
+  const[showForm,setShowForm]=useState(false);
+  const[editType,setEditType]=useState(null);
+  const[delId,setDelId]=useState(null);
+  const saveType=(data)=>{
+    let upd;
+    if(editType){upd=types.map(t=>t.id===editType.id?{...t,...data}:t);addAudit(session.username,session.role,'EDIT_DEVICE_TYPE',data.name);toast('Updated');}
+    else{upd=[...types,{...data,id:'dt_'+Date.now()}];addAudit(session.username,session.role,'ADD_DEVICE_TYPE',data.name);toast('Created');}
+    ss(KEY.deviceTypes,upd);setTypes(upd);setShowForm(false);setEditType(null);
+  };
+  const delType=(id)=>{const t=types.find(x=>x.id===id);const upd=types.filter(x=>x.id!==id);ss(KEY.deviceTypes,upd);setTypes(upd);addAudit(session.username,session.role,'DELETE_DEVICE_TYPE',t?.name);toast('Deleted','info');setDelId(null);};
+  const cd={blue:'#2563eb',gray:'#374151',teal:'#0d9488',purple:'#7c3aed'};
+  return <div className="page-content">
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:22}}>
+      <div><div className="section-title">Device types</div><div className="section-sub">Manage device schemas</div></div>
+      <button className="btn btn-primary" onClick={()=>{setEditType(null);setShowForm(true)}}>+ New type</button>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:16}}>
+      {types.map(t=><div key={t.id} className="card" style={{padding:20}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}><div style={{width:13,height:13,borderRadius:'50%',background:cd[t.color]||cd.purple,flexShrink:0}}/><span style={{fontWeight:700,fontSize:'15px',color:'var(--midnight)'}}>{t.name}</span></div>
+          <div style={{display:'flex',gap:6}}><button className="btn btn-ghost btn-sm" onClick={()=>{setEditType(t);setShowForm(true)}}>Edit</button><button className="btn btn-sm" style={{background:'var(--persimmon-20)',color:'var(--persimmon)',border:'1px solid #f8bba4',borderRadius:6,cursor:'pointer',fontSize:'12px',padding:'5px 11px',fontWeight:600}} onClick={()=>setDelId(t.id)}>Delete</button></div>
+        </div>
+        <div style={{fontSize:'12px',color:'var(--slate-80)',marginBottom:8}}>{t.fields.length} fields</div>
+        <div style={{display:'flex',flexWrap:'wrap'}}>{t.fields.slice(0,6).map(f=><span key={f.id} className="tag">{f.label}</span>)}{t.fields.length>6&&<span className="tag">+{t.fields.length-6}</span>}</div>
+      </div>)}
+    </div>
+    {showForm&&<DTModal type={editType} onClose={()=>{setShowForm(false);setEditType(null);}} onSave={saveType}/>}
+    {delId&&<Confirm title="Delete type" msg="Delete this device type?" dangerous onConfirm={()=>delType(delId)} onClose={()=>setDelId(null)}/>}
+  </div>;
+}
+
+function DTModal({type,onClose,onSave}){
+  const[name,setName]=useState(type?.name||'');
+  const[color,setColor]=useState(type?.color||'purple');
+  const[fields,setFields]=useState(type?.fields||[]);
+  const[err,setErr]=useState({});
+  const add=()=>setFields(p=>[...p,{id:'f_'+Date.now(),label:'',type:'text',required:false,options:'',copy:false}]);
+  const upd=(i,k,v)=>setFields(p=>p.map((f,j)=>j===i?{...f,[k]:v}:f));
+  const rem=(i)=>setFields(p=>p.filter((_,j)=>j!==i));
+  const submit=()=>{
+    const e={};if(!name.trim()) e.name='Required';if(Object.keys(e).length){setErr(e);return;}
+    const flds=fields.map(f=>({...f,id:f.id||'f_'+Date.now(),options:(f.type==='dropdown'||f.type==='multi-select')?(typeof f.options==='string'?f.options.split(',').map(o=>o.trim()).filter(Boolean):f.options||[]):undefined}));
+    onSave({name,color,fields:flds});
+  };
+  return <div className="modal-overlay"><div className="modal modal-xl" style={{maxHeight:'92vh',overflowY:'auto'}}>
+    <h2 style={{fontSize:'17px',fontWeight:700,marginBottom:20,color:'var(--midnight)'}}>{type?'Edit type':'New device type'}</h2>
+    <div className="grid-2" style={{marginBottom:16}}>
+      <div className="form-group"><label className="label">Type name *</label><input className="input-field" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Crestron Processor"/>{err.name&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{err.name}</div>}</div>
+      <div className="form-group"><label className="label">Card color</label><select className="input-field" value={color} onChange={e=>setColor(e.target.value)}><option value="purple">Purple</option><option value="blue">Blue</option><option value="teal">Teal</option><option value="gray">Dark grey</option></select></div>
+    </div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}><h3 style={{fontSize:'14px',fontWeight:600,color:'var(--slate)'}}>Fields ({fields.length})</h3><button className="btn btn-secondary btn-sm" onClick={add}>+ Add field</button></div>
+    {fields.map((f,i)=><div key={f.id} style={{background:'var(--slate-10)',borderRadius:9,padding:14,marginBottom:10,border:'1px solid var(--slate-20)'}}>
+      <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 100px 36px',gap:8,alignItems:'end',marginBottom:8}}>
+        <div><label className="label">Label</label><input className="input-field" value={f.label} onChange={e=>upd(i,'label',e.target.value)} placeholder="e.g. IP Address"/></div>
+        <div><label className="label">Type</label><select className="input-field" value={f.type} onChange={e=>upd(i,'type',e.target.value)}><option value="text">Text</option><option value="number">Number</option><option value="dropdown">Dropdown</option><option value="multi-select">Multi-select</option><option value="date">Date</option><option value="toggle">Toggle</option></select></div>
+        <div><label className="label">Required</label><select className="input-field" value={f.required?'yes':'no'} onChange={e=>upd(i,'required',e.target.value==='yes')}><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <button onClick={()=>rem(i)} style={{background:'var(--persimmon-20)',color:'var(--persimmon)',border:'none',borderRadius:6,cursor:'pointer',fontSize:'14px',padding:'9px 10px'}}>✕</button>
+      </div>
+      {(f.type==='dropdown'||f.type==='multi-select')&&<div style={{marginBottom:8}}><label className="label">Options (comma-separated)</label><input className="input-field" value={typeof f.options==='string'?f.options:(f.options||[]).join(', ')} onChange={e=>upd(i,'options',e.target.value)}/></div>}
+      <label style={{fontSize:'12px',color:'var(--slate-80)',cursor:'pointer',display:'flex',alignItems:'center',gap:6}}><input type="checkbox" checked={!!f.copy} onChange={e=>upd(i,'copy',e.target.checked)}/>Show copy button</label>
+    </div>)}
+    {fields.length===0&&<div style={{textAlign:'center',padding:'20px',color:'var(--slate-40)',fontSize:'13px',border:'1px dashed var(--slate-20)',borderRadius:8}}>No fields. Click + Add field.</div>}
+    <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:18}}><button className="btn btn-secondary" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={submit}>{type?'Save':'Create'}</button></div>
+  </div></div>;
+}
+
+/* ── BULK UPLOAD ── */
+function BulkPage({session}){
+  const toast=useContext(ToastCtx);const{push}=useContext(SyncCtx);
+  const[preview,setPreview]=useState(null);const[result,setResult]=useState(null);const[loading,setLoading]=useState(false);const fRef=useRef();
+  const dlTemplate=()=>{
+    const types=ls(KEY.deviceTypes,[]);
+    const tl=types.map(t=>t.id||t.name).join(' | ');
+    const h='room_id,room_name,floor,building,capacity,device_type,device_name,serial_number,mac_address,ip_address,po_number,invoice_number,model,asset_tag,firmware_version,screen_size,input_type,active_input,resolution,paired_with,notes';
+    const s='room_001,Himalaya VC,Floor 3,Tower B,10,poly_x70,Poly X70 Camera,SN123456,AA:BB:CC:DD:EE:FF,192.168.1.10,PO-2024-001,INV-001,Poly X70,AT-001,6.2.1,,,,,,Boardroom unit';
+    const blob=new Blob([`# device_type values: ${tl}\n${h}\n${s}`],{type:'text/csv'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='av_bulk_template.csv';a.click();toast('Template downloaded');
+  };
+  const parseCSV=(text)=>{
+    const lines=text.trim().split('\n').filter(l=>!l.startsWith('#'));
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/ /g,'_'));
+    return lines.slice(1).map(l=>{const vals=l.split(',').map(v=>v.trim());const o={};headers.forEach((h,i)=>o[h]=vals[i]||'');return o;}).filter(r=>r.room_id||r.room_name);
+  };
+  const handleFile=(e)=>{const f=e.target.files[0];if(!f) return;const r=new FileReader();r.onload=ev=>{setPreview(parseCSV(ev.target.result));setResult(null);};r.readAsText(f);};
+  const importData=async()=>{
+    setLoading(true);
+    setTimeout(async()=>{
+      const rooms=ls(KEY.rooms,[]);const devs=ls(KEY.devices,[]);
+      let cr=0,up=0,er=0;const rmap=Object.fromEntries(rooms.map(r=>[r.id,r]));
+      const nr=[...rooms];const nd=[...devs];
+      preview.forEach(row=>{
+        try{
+          if(!row.room_id&&!row.room_name) return;
+          let room=rmap[row.room_id];
+          if(!room){room={id:row.room_id||'room_'+Date.now(),name:row.room_name,floor:row.floor,building:row.building,capacity:row.capacity,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};nr.push(room);rmap[room.id]=room;cr++;}else up++;
+          if(row.device_type&&row.device_name) nd.push({id:'dev_'+Date.now()+'_'+Math.random().toString(36).slice(2),roomId:room.id,deviceTypeId:row.device_type,fields:{device_name:row.device_name,serial_number:row.serial_number,mac_address:row.mac_address,ip_address:row.ip_address,po_number:row.po_number,invoice_number:row.invoice_number,model:row.model,asset_tag:row.asset_tag,firmware_version:row.firmware_version,screen_size:row.screen_size,input_type:row.input_type,active_input:row.active_input,resolution:row.resolution,paired_with:row.paired_with,notes:row.notes},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+        }catch{er++;}
+      });
+      ss(KEY.rooms,nr);ss(KEY.devices,nd);
+      addAudit(session.username,session.role,'BULK_UPLOAD',`${cr} created, ${up} updated`);
+      const ok=await push();
+      setResult({cr,up,er,ok});setPreview(null);setLoading(false);
+      toast(`Import complete: ${cr} created, ${up} updated${ok?' — synced to all viewers ✓':''}`);
+    },800);
+  };
+  return <div className="page-content">
+    <div className="section-title">Bulk upload</div>
+    <div className="section-sub">Upload CSV → data instantly visible to all viewers</div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,maxWidth:800,marginBottom:24}}>
+      <div className="card" style={{padding:22}}><h3 style={{fontSize:'14px',fontWeight:700,marginBottom:10,color:'var(--midnight)'}}>Step 1 — Download template</h3><p style={{fontSize:'13px',color:'var(--slate-80)',marginBottom:14}}>CSV with all your device types listed.</p><button className="btn btn-secondary" onClick={dlTemplate}>⬇️ Download template</button></div>
+      <div className="card" style={{padding:22}}><h3 style={{fontSize:'14px',fontWeight:700,marginBottom:10,color:'var(--midnight)'}}>Step 2 — Upload CSV</h3><p style={{fontSize:'13px',color:'var(--slate-80)',marginBottom:14}}>Preview before confirming. Syncs live automatically.</p><input ref={fRef} type="file" accept=".csv" onChange={handleFile}/></div>
+    </div>
+    {loading&&<><div className="spinner"/><p style={{textAlign:'center',color:'var(--slate-80)',fontSize:'13px',marginTop:8}}>Importing and syncing…</p></>}
+    {result&&<div className="alert alert-success" style={{maxWidth:500}}>✅ <strong>Done!</strong> {result.cr} rooms created, {result.up} updated{result.er>0?`, ${result.er} errors`:''}{result.ok?' · Synced to all viewers ✓':' · (Configure sync in Settings)'}</div>}
+    {preview&&<>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14,maxWidth:900}}>
+        <h3 style={{fontSize:'14px',fontWeight:700,color:'var(--midnight)'}}>Preview — {preview.length} rows</h3>
+        <div style={{display:'flex',gap:8}}><button className="btn btn-secondary" onClick={()=>setPreview(null)}>Cancel</button><button className="btn btn-primary" onClick={importData}>✓ Confirm import + sync</button></div>
+      </div>
+      <div className="card table-wrap" style={{maxWidth:900}}>
+        <table><thead><tr><th>Room ID</th><th>Room name</th><th>Floor</th><th>Building</th><th>Device type</th><th>Device name</th></tr></thead>
+        <tbody>{preview.slice(0,25).map((r,i)=><tr key={i}><td>{r.room_id}</td><td>{r.room_name}</td><td>{r.floor}</td><td>{r.building}</td><td><code style={{fontSize:'12px',background:'var(--slate-10)',padding:'2px 6px',borderRadius:4}}>{r.device_type}</code></td><td>{r.device_name}</td></tr>)}</tbody></table>
+        {preview.length>25&&<div style={{padding:'8px 14px',fontSize:'13px',color:'var(--slate-80)'}}>…and {preview.length-25} more</div>}
+      </div>
+    </>}
+  </div>;
+}
+
+/* ── AUDIT ── */
+function AuditPage(){
+  const logs=ls(KEY.audit,[]);
+  return <div className="page-content">
+    <div className="section-title">Audit log</div><div className="section-sub">Last 50 actions</div>
+    {logs.length===0?<div className="empty-state"><div className="empty-icon">📋</div><p>No events yet.</p></div>
+    :<div className="card table-wrap"><table>
+      <thead><tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Details</th></tr></thead>
+      <tbody>{logs.map((l,i)=><tr key={i}>
+        <td style={{whiteSpace:'nowrap',fontSize:'12.5px'}}>{new Date(l.ts).toLocaleString()}</td>
+        <td><strong style={{color:'var(--midnight)'}}>{l.user}</strong></td>
+        <td><span className={`badge ${l.role==='admin'?'badge-blue':'badge-gray'}`}>{l.role}</span></td>
+        <td><code style={{fontSize:'12px',background:'var(--slate-10)',padding:'2px 7px',borderRadius:4}}>{l.action}</code></td>
+        <td style={{fontSize:'13px',color:'var(--slate-80)',maxWidth:280}}>{l.details}</td>
+      </tr>)}</tbody>
+    </table></div>}
+  </div>;
+}
+
+/* ── SETTINGS ── */
+function SettingsPage({session}){
+  const toast=useContext(ToastCtx);
+  const{cfg,saveCfg,pull,push,status}=useContext(SyncCtx);
+  const[ap,setAp]=useState({old:'',new1:'',new2:''});
+  const[vp,setVp]=useState({new1:'',new2:''});
+  const[pErr,setPErr]=useState({});
+  const[showReset,setShowReset]=useState(false);
+  const[qrUrl,setQrUrl]=useState(()=>ls(KEY.qrBaseUrl,'')||'');
+  const[qrSaved,setQrSaved]=useState(false);
+  const[sf,setSf]=useState({...cfg});
+  const[testing,setTesting]=useState(false);
+  const iRef=useRef();
+
+  const saveQr=()=>{const u=qrUrl.trim();if(u&&!u.startsWith('http')){toast('Must start with http://','error');return;}ss(KEY.qrBaseUrl,u||null);toast('QR URL saved');setQrSaved(true);setTimeout(()=>setQrSaved(false),2500);};
+  const changeAP=async()=>{
+    const e={};if(!ap.old) e.ao='Required';if(!ap.new1||ap.new1.length<6) e.an1='Min 6 chars';if(ap.new1!==ap.new2) e.an2='No match';
+    if(Object.keys(e).length){setPErr(e);return;}
+    const users=ls(KEY.users,{});const oh=await sha256(ap.old);
+    if(oh!==users.av_admin?.passwordHash){setPErr({ao:'Incorrect'});return;}
+    users.av_admin.passwordHash=await sha256(ap.new1);ss(KEY.users,users);
+    addAudit(session.username,session.role,'CHANGE_PASSWORD','Admin password changed');
+    toast('Admin password updated');setAp({old:'',new1:'',new2:''});setPErr({});
+  };
+  const changeVP=async()=>{
+    const e={};if(!vp.new1||vp.new1.length<6) e.vn1='Min 6 chars';if(vp.new1!==vp.new2) e.vn2='No match';
+    if(Object.keys(e).length){setPErr(e);return;}
+    const users=ls(KEY.users,{});users.av_viewer.passwordHash=await sha256(vp.new1);ss(KEY.users,users);
+    addAudit(session.username,session.role,'CHANGE_PASSWORD','Viewer password changed');
+    toast('Viewer password updated');setVp({new1:'',new2:''});setPErr({});
+  };
+  const exportData=()=>{const data=buildAppData();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`av_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();toast('Exported');};
+  const importData=(e)=>{const f=e.target.files[0];if(!f) return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);applyAppData(d);toast('Imported. Refresh to see changes.');}catch{toast('Invalid file','error');}};r.readAsText(f);e.target.value='';};
+  const resetAll=()=>{ss(KEY.rooms,[]);ss(KEY.devices,[]);ss(KEY.deviceTypes,PRE_DEVICE_TYPES);ss(KEY.audit,[]);addAudit(session.username,session.role,'RESET','All data reset');toast('Reset done','info');setShowReset(false);};
+  const saveSyncCfg=()=>{saveCfg(sf);toast('Sync settings saved');};
+  const testSync=async()=>{setTesting(true);saveCfg(sf);await new Promise(r=>setTimeout(r,600));await pull();setTesting(false);};
+  const pushNow=async()=>{const ok=await push();toast(ok?'Pushed to all viewers ✓':'Push failed — check settings',ok?'success':'error');};
+
+  return <div className="page-content" style={{maxWidth:760}}>
+    <div className="section-title">Settings</div>
+    <div className="section-sub">Live sync, QR URL, passwords, data management</div>
+
+    {/* LIVE SYNC */}
+    <div className="card" style={{padding:24,marginBottom:20,border:'2px solid var(--super-blue)'}}>
+      <h3 style={{fontSize:'16px',fontWeight:700,marginBottom:6,color:'var(--midnight)'}}>🔄 Live sync <span style={{background:'var(--blueberry-10)',color:'var(--super-blue)',fontSize:'11px',padding:'2px 9px',borderRadius:20,fontWeight:600,marginLeft:8}}>{sf.mode==='local'?'Off':sf.mode==='both'?'Sheets + GitHub':sf.mode==='sheets'?'Google Sheets':'GitHub JSON'}</span></h3>
+      <p style={{fontSize:'13px',color:'var(--slate-80)',marginBottom:18,lineHeight:1.7}}>When enabled, <strong>any change admin makes is instantly visible to all viewers</strong> on any device. No manual sharing needed.</p>
+      <div className="form-group" style={{marginBottom:18}}>
+        <label className="label">Sync mode</label>
+        <select className="input-field" style={{maxWidth:320}} value={sf.mode} onChange={e=>setSf(p=>({...p,mode:e.target.value}))}>
+          <option value="local">⚪ Local only (no sync)</option>
+          <option value="sheets">📊 Google Sheets only</option>
+          <option value="github">🐙 GitHub JSON only</option>
+          <option value="both">⭐ Both — Sheets + GitHub (recommended)</option>
+        </select>
+      </div>
+
+      {(sf.mode==='sheets'||sf.mode==='both')&&<div style={{background:'var(--blueberry-10)',borderRadius:10,padding:18,marginBottom:16,border:'1px solid var(--blueberry-20)'}}>
+        <div style={{fontWeight:700,color:'var(--midnight)',marginBottom:14,fontSize:'14px'}}>📊 Google Sheets setup</div>
+        <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:16}}>
+          {[
+            {n:1,c:<>Go to <a href="https://sheets.google.com" target="_blank" style={{color:'var(--super-blue)'}}>sheets.google.com</a> → create a new spreadsheet</>},
+            {n:2,c:<>Name the first sheet tab exactly: <code className="ci">av_data</code></>},
+            {n:3,c:<>In cell A1 paste: <code className="ci">{'{"rooms":[],"devices":[],"deviceTypes":[],"lastUpdated":""}'}</code></>},
+            {n:4,c:<>File → Share → <strong>Publish to web</strong> → Sheet: av_data → CSV → Publish</>},
+            {n:5,c:<>Copy the <strong>Spreadsheet ID</strong> from URL: docs.google.com/spreadsheets/d/<strong>[THIS]</strong>/edit</>},
+            {n:6,c:<>Extensions → Apps Script → paste script below → Deploy → Web app → Anyone → copy URL</>},
+          ].map(s=><div key={s.n} style={{display:'flex',gap:10,alignItems:'flex-start'}}><div className="step-num">{s.n}</div><div style={{fontSize:'13px',color:'var(--slate)',paddingTop:4,lineHeight:1.6}}>{s.c}</div></div>)}
+        </div>
+        <div style={{background:'#0f1117',borderRadius:8,padding:16,marginBottom:14,fontFamily:'monospace',fontSize:'11.5px',color:'#c3e88d',lineHeight:1.8,overflow:'auto'}}>
+          <div style={{color:'#546e7a',marginBottom:4}}>// Paste in Google Apps Script (Extensions → Apps Script):</div>
+          {`function doPost(e) {
+  var d = JSON.parse(e.postData.contents);
+  var sheet = SpreadsheetApp.openById(d.sheetId).getSheetByName('av_data');
+  sheet.getRange('A1').setValue(d.data);
+  return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doGet(e) {
+  return ContentService.createTextOutput('AV Manager API running');
+}`}
+        </div>
+        <div className="grid-2">
+          <div className="form-group"><label className="label">Spreadsheet ID *</label><input className="input-field" value={sf.sheetsId||''} onChange={e=>setSf(p=>({...p,sheetsId:e.target.value}))} placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" style={{fontFamily:'monospace',fontSize:'12px'}}/></div>
+          <div className="form-group"><label className="label">Apps Script web app URL *</label><input className="input-field" value={sf.sheetsScriptUrl||''} onChange={e=>setSf(p=>({...p,sheetsScriptUrl:e.target.value}))} placeholder="https://script.google.com/macros/s/.../exec" style={{fontFamily:'monospace',fontSize:'12px'}}/></div>
+        </div>
+      </div>}
+
+      {(sf.mode==='github'||sf.mode==='both')&&<div style={{background:'var(--agave-20)',borderRadius:10,padding:18,marginBottom:16,border:'1px solid #9ee9e3'}}>
+        <div style={{fontWeight:700,color:'var(--midnight)',marginBottom:14,fontSize:'14px'}}>🐙 GitHub JSON setup</div>
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:14}}>
+          {[
+            {n:1,c:<>Create a <strong>public</strong> GitHub repo (e.g. <code className="ci">av-asset-data</code>)</>},
+            {n:2,c:<>GitHub → Settings → Developer Settings → Personal access tokens → Generate → select <code className="ci">repo</code> scope → copy token</>},
+            {n:3,c:<>Enter details below. App will auto-create <code className="ci">av_data.json</code> in the repo on first push.</>},
+          ].map(s=><div key={s.n} style={{display:'flex',gap:10,alignItems:'flex-start'}}><div className="step-num">{s.n}</div><div style={{fontSize:'13px',color:'var(--slate)',paddingTop:4,lineHeight:1.6}}>{s.c}</div></div>)}
+        </div>
+        <div className="grid-3">
+          <div className="form-group"><label className="label">GitHub username *</label><input className="input-field" value={sf.githubOwner||''} onChange={e=>setSf(p=>({...p,githubOwner:e.target.value}))} placeholder="amit06012000"/></div>
+          <div className="form-group"><label className="label">Repository name *</label><input className="input-field" value={sf.githubRepo||''} onChange={e=>setSf(p=>({...p,githubRepo:e.target.value}))} placeholder="av-asset-data"/></div>
+          <div className="form-group"><label className="label">Personal access token *</label><input className="input-field" type="password" value={sf.githubToken||''} onChange={e=>setSf(p=>({...p,githubToken:e.target.value}))} placeholder="ghp_xxxxxxxxxxxx"/></div>
+        </div>
+        <div className="form-group"><label className="label">JSON file path</label><input className="input-field" style={{maxWidth:220}} value={sf.githubPath||'av_data.json'} onChange={e=>setSf(p=>({...p,githubPath:e.target.value}))}/></div>
+      </div>}
+
+      {sf.mode!=='local'&&<div style={{display:'flex',alignItems:'center',gap:16,marginBottom:18,flexWrap:'wrap'}}>
+        <label style={{display:'flex',alignItems:'center',gap:8,fontSize:'13.5px',color:'var(--slate)',cursor:'pointer'}}>
+          <label className="toggle-switch"><input type="checkbox" checked={!!sf.autoSync} onChange={e=>setSf(p=>({...p,autoSync:e.target.checked}))}/><span className="toggle-slider"/></label>
+          Auto-refresh every
+        </label>
+        <select className="input-field" style={{width:130}} value={sf.syncInterval||30} onChange={e=>setSf(p=>({...p,syncInterval:Number(e.target.value)}))}>
+          <option value={10}>10 seconds</option><option value={30}>30 seconds</option><option value={60}>1 minute</option><option value={300}>5 minutes</option>
+        </select>
+      </div>}
+
+      <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+        <button className="btn btn-primary" onClick={saveSyncCfg}>💾 Save sync settings</button>
+        {sf.mode!=='local'&&<>
+          <button className="btn btn-secondary" onClick={testSync} disabled={testing}>{testing?<><div className="spinner spinner-sm"/><span style={{marginLeft:6}}>Testing…</span></>:'🔌 Test connection'}</button>
+          <button className="btn btn-success" onClick={pushNow}>📤 Push data to all viewers now</button>
+        </>}
+      </div>
+      {sf.mode!=='local'&&status==='live'&&<div style={{marginTop:10,fontSize:'12px',color:'var(--agave-110)',fontWeight:500}}>✓ Sync is active and working</div>}
+      {sf.mode!=='local'&&status==='error'&&<div style={{marginTop:10,fontSize:'12px',color:'var(--persimmon)',fontWeight:500}}>✗ Sync error — check your credentials and try Test connection</div>}
+    </div>
+
+    {/* QR URL */}
+    <div className="card" style={{padding:24,marginBottom:20}}>
+      <h3 style={{fontSize:'15px',fontWeight:700,marginBottom:6,color:'var(--midnight)'}}>🔲 QR code URL</h3>
+      <p style={{fontSize:'13px',color:'var(--slate-80)',marginBottom:14,lineHeight:1.7}}>URL encoded in QR codes. Must be reachable from phones.</p>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+        <div style={{flex:1,minWidth:200}}><input className="input-field" value={qrUrl} onChange={e=>setQrUrl(e.target.value)} placeholder="https://amit06012000.github.io/AV_Asset_Management/" style={{fontFamily:'monospace',fontSize:'13px'}}/></div>
+        <button className="btn btn-primary" onClick={saveQr}>{qrSaved?'✓ Saved!':'Save URL'}</button>
+      </div>
+      {qrUrl&&qrUrl.startsWith('http')&&<div style={{color:'var(--agave-110)',fontSize:'12px',marginTop:6}}>✓ QR links to: <strong>{qrUrl}</strong></div>}
+    </div>
+
+    {/* PASSWORDS */}
+    <div className="card" style={{padding:24,marginBottom:20}}>
+      <h3 style={{fontSize:'15px',fontWeight:700,marginBottom:18,color:'var(--midnight)'}}>🔐 Change admin password</h3>
+      <div className="form-group"><label className="label">Current password</label><input className="input-field" type="password" value={ap.old} onChange={e=>setAp(p=>({...p,old:e.target.value}))}/>{pErr.ao&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{pErr.ao}</div>}</div>
+      <div className="grid-2">
+        <div className="form-group"><label className="label">New password</label><input className="input-field" type="password" value={ap.new1} onChange={e=>setAp(p=>({...p,new1:e.target.value}))}/>{pErr.an1&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{pErr.an1}</div>}</div>
+        <div className="form-group"><label className="label">Confirm</label><input className="input-field" type="password" value={ap.new2} onChange={e=>setAp(p=>({...p,new2:e.target.value}))}/>{pErr.an2&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{pErr.an2}</div>}</div>
+      </div>
+      <button className="btn btn-primary" onClick={changeAP}>Update admin password</button>
+    </div>
+    <div className="card" style={{padding:24,marginBottom:20}}>
+      <h3 style={{fontSize:'15px',fontWeight:700,marginBottom:18,color:'var(--midnight)'}}>👁 Change viewer password</h3>
+      <div className="grid-2">
+        <div className="form-group"><label className="label">New password</label><input className="input-field" type="password" value={vp.new1} onChange={e=>setVp(p=>({...p,new1:e.target.value}))}/>{pErr.vn1&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{pErr.vn1}</div>}</div>
+        <div className="form-group"><label className="label">Confirm</label><input className="input-field" type="password" value={vp.new2} onChange={e=>setVp(p=>({...p,new2:e.target.value}))}/>{pErr.vn2&&<div style={{color:'var(--persimmon)',fontSize:'12px',marginTop:4}}>{pErr.vn2}</div>}</div>
+      </div>
+      <button className="btn btn-primary" onClick={changeVP}>Update viewer password</button>
+    </div>
+    <div className="card" style={{padding:24,marginBottom:20}}>
+      <h3 style={{fontSize:'15px',fontWeight:700,marginBottom:14,color:'var(--midnight)'}}>💾 Data management</h3>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+        <button className="btn btn-secondary" onClick={exportData}>⬇️ Export backup (JSON)</button>
+        <button className="btn btn-secondary" onClick={()=>iRef.current.click()}>⬆️ Import backup</button>
+        <input ref={iRef} type="file" accept=".json" onChange={importData} style={{display:'none'}}/>
+      </div>
+    </div>
+    <div className="card" style={{padding:24,border:'1px solid var(--persimmon-20)'}}>
+      <h3 style={{fontSize:'15px',fontWeight:700,marginBottom:10,color:'var(--persimmon)'}}>⚠️ Danger zone</h3>
+      <p style={{fontSize:'13px',color:'var(--slate-80)',marginBottom:14}}>Reset all data. Cannot be undone.</p>
+      <button className="btn btn-danger" onClick={()=>setShowReset(true)}>🗑️ Reset all data</button>
+    </div>
+    {showReset&&<Confirm title="Reset all data" dangerous msg="Permanently delete ALL rooms, devices, and logs? Cannot be undone." onConfirm={resetAll} onClose={()=>setShowReset(false)}/>}
+  </div>;
+}
+
+/* ── LOGIN ── */
+function LoginPage({login}){
+  const[u,setU]=useState('');const[pw,setPw]=useState('');const[loading,setLoading]=useState(false);const[err,setErr]=useState('');
+  const submit=async(e)=>{e.preventDefault();if(!u||!pw){setErr('Enter username and password');return;}setLoading(true);setErr('');const ok=await login(u,pw);setLoading(false);if(!ok) setErr('Invalid username or password');};
+  return <div className="login-page"><div className="login-box">
+    <div style={{textAlign:'center',marginBottom:30}}>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Intuit-logo.svg/2560px-Intuit-logo.svg.png" alt="Intuit" style={{height:'38px',display:'block',margin:'0 auto 18px'}}/>
+      <h1 style={{fontSize:'22px',fontWeight:700,color:'var(--midnight)',marginBottom:5}}>AV Asset Manager</h1>
+      <p style={{fontSize:'13.5px',color:'var(--slate-80)'}}>Intuit India — Bengaluru</p>
+      <p style={{fontSize:'12px',color:'var(--slate-40)',marginTop:3}}>Internal tool · Authorized access only</p>
+    </div>
+    <form onSubmit={submit}>
+      <div className="form-group"><label className="label">Username</label><div className="input-with-icon"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input className="input-field" value={u} onChange={e=>setU(e.target.value)} placeholder="Username" autoFocus autoComplete="username"/></div></div>
+      <div className="form-group"><label className="label">Password</label><div className="input-with-icon"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input className="input-field" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password" autoComplete="current-password"/></div></div>
+      {err&&<div className="alert alert-error" style={{marginBottom:14}}>{err}</div>}
+      <button className="btn btn-primary" type="submit" disabled={loading} style={{width:'100%',justifyContent:'center',padding:'12px',fontSize:'15px',marginBottom:6}}>{loading?'Signing in…':'Sign in'}</button>
+    </form>
+
+  </div></div>;
+}
+
+/* ── QR MODALS ── */
+function QRModal({room,onClose}){
+  const qrRef=useRef();const toast=useContext(ToastCtx);
+  const base=getQrBaseUrl();const isFile=!base||base.startsWith('file://');
+  const qrUrl=isFile?'':`${base}?room=${room.id}`;
+  useEffect(()=>{
+    if(!qrRef.current||isFile) return;
+    qrRef.current.innerHTML='';
+    try{new QRCode(qrRef.current,{text:qrUrl,width:210,height:210,colorDark:'#0c1a4d',colorLight:'#ffffff'});}
+    catch(e){qrRef.current.innerHTML='<p style="color:var(--persimmon);padding:20px">QR generation failed.</p>';}
+  },[qrUrl,isFile]);
+  const dl=()=>{
+    if(isFile){toast('Set app URL in Settings first','error');return;}
+    const canvas=qrRef.current?.querySelector('canvas');if(!canvas){toast('QR not ready','error');return;}
+    const c2=document.createElement('canvas');c2.width=260;c2.height=310;const ctx=c2.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,260,310);ctx.strokeStyle='#0c1a4d';ctx.lineWidth=3;ctx.strokeRect(2,2,256,306);
+    ctx.drawImage(canvas,25,20);ctx.fillStyle='#0c1a4d';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText(room.name,130,258);
+    ctx.fillStyle='#667788';ctx.font='11px sans-serif';ctx.fillText([room.building,room.floor].filter(Boolean).join(' · '),130,275);
+    ctx.fillStyle='#236cff';ctx.font='bold 10px sans-serif';ctx.fillText('AV Asset Manager · Intuit India',130,295);
+    const a=document.createElement('a');a.download=`qr_${room.name.replace(/\s+/g,'_')}.png`;a.href=c2.toDataURL();a.click();toast('QR downloaded');
+  };
+  return <div className="modal-overlay"><div className="modal" style={{textAlign:'center'}}>
+    <h2 style={{fontSize:'17px',fontWeight:700,marginBottom:4,color:'var(--midnight)'}}>{room.name}</h2>
+    <p style={{fontSize:'12.5px',color:'var(--slate-80)',marginBottom:16}}>Scan with phone to view device details</p>
+    {isFile?<div style={{background:'var(--lemon-20)',border:'1px solid var(--lemon)',borderRadius:10,padding:20,textAlign:'left',marginBottom:16}}>
+      <div style={{fontWeight:700,color:'#92400e',marginBottom:8}}>⚠️ App URL not configured</div>
+      <div style={{fontSize:'13px',color:'#78350f',lineHeight:1.7}}>Go to <strong>Settings → QR code URL</strong> and enter your hosted URL first.</div>
+    </div>:<>
+      <div className="qr-wrap"><div ref={qrRef} style={{display:'inline-block',padding:10,background:'#fff',border:'2px solid var(--midnight)',borderRadius:10}}/></div>
+      <div style={{background:'var(--blueberry-10)',borderRadius:8,padding:'8px 14px',margin:'12px 0',fontSize:'11.5px',color:'var(--blueberry-110)',wordBreak:'break-all'}}>🔗 {qrUrl}</div>
+    </>}
+    <div style={{display:'flex',gap:10,justifyContent:'center',marginTop:8,flexWrap:'wrap'}}>
+      {!isFile&&<button className="btn btn-primary" onClick={dl}>⬇️ Download PNG</button>}
+      <button className="btn btn-secondary" onClick={onClose}>Close</button>
+    </div>
+  </div></div>;
+}
+
+function AllQRModal({rooms,onClose}){
+  const cRef=useRef();const base=getQrBaseUrl();const isFile=!base||base.startsWith('file://');
+  useEffect(()=>{
+    if(!cRef.current||isFile) return;
+    rooms.forEach(r=>{const w=cRef.current.querySelector(`#qr-${r.id}`);if(!w||w.children.length>0) return;try{new QRCode(w,{text:`${base}?room=${r.id}`,width:120,height:120,colorDark:'#0c1a4d',colorLight:'#ffffff'});}catch{}});
+  },[rooms,isFile,base]);
+  return <div className="modal-overlay"><div className="modal modal-xl" style={{maxHeight:'90vh',overflowY:'auto'}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16,flexWrap:'wrap',gap:10}}>
+      <h2 style={{fontSize:'17px',fontWeight:700,color:'var(--midnight)'}}>All room QR codes</h2>
+      <div style={{display:'flex',gap:8}}>{!isFile&&<button className="btn btn-secondary" onClick={()=>window.print()}>🖨️ Print all</button>}<button className="btn btn-ghost" onClick={onClose}>Close</button></div>
+    </div>
+    {isFile?<div style={{background:'var(--lemon-20)',border:'1px solid var(--lemon)',borderRadius:10,padding:20}}><div style={{fontWeight:700,color:'#92400e',marginBottom:6}}>⚠️ App URL not configured</div><div style={{fontSize:'13px',color:'#78350f'}}>Go to Settings → QR code URL first.</div></div>
+    :<div ref={cRef} style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:14}}>
+      {rooms.map(r=><div key={r.id} style={{textAlign:'center',padding:14,border:'2px solid var(--midnight)',borderRadius:10,background:'#fff'}}>
+        <div id={`qr-${r.id}`} style={{display:'inline-block',marginBottom:8}}/>
+        <div style={{fontSize:'12.5px',fontWeight:700,color:'var(--midnight)',lineHeight:1.3}}>{r.name}</div>
+        <div style={{fontSize:'11px',color:'var(--slate-80)',marginTop:2}}>{[r.building,r.floor].filter(Boolean).join(' · ')}</div>
+        <div style={{fontSize:'10px',color:'var(--super-blue)',marginTop:3,fontWeight:600}}>AV Asset Manager</div>
+      </div>)}
+    </div>}
+  </div></div>;
+}
+
+/* ── CONFIRM ── */
+function Confirm({title,msg,onConfirm,onClose,dangerous}){
+  return <div className="modal-overlay"><div className="modal">
+    <h2 style={{fontSize:'16px',fontWeight:700,marginBottom:10,color:dangerous?'var(--persimmon)':'var(--midnight)'}}>{title}</h2>
+    <p style={{fontSize:'13.5px',color:'var(--slate)',lineHeight:1.6,marginBottom:22}}>{msg}</p>
+    <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+      <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+      <button className={`btn ${dangerous?'btn-danger':'btn-primary'}`} onClick={onConfirm}>Confirm</button>
+    </div>
+  </div></div>;
+}
+
+function Root(){return <ToastProvider><SyncProvider><App/></SyncProvider></ToastProvider>;}
+ReactDOM.render(<Root/>,document.getElementById('app'));
+</script>
+</body>
+</html>
